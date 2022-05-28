@@ -1,4 +1,11 @@
 chrome.runtime.onInstalled.addListener(function() {
+
+    chrome.contextMenus.create({
+        id: 'sendimagetodrip',
+        title: "Send Image To Drip",
+        contexts:["image"],
+    });
+    
     chrome.contextMenus.create({
         id: 'sendimagetodiscord',
         title: "Send Image To Discord",
@@ -41,6 +48,8 @@ var username = "";
 
 var webhook_is_valid = true;
 
+var drip = [];
+
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     sendResponse({});
     if (request.type == 'set_webhook_valid') {
@@ -51,6 +60,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 chrome.contextMenus.onClicked.addListener(function(info, tab) {
     if (info.menuItemId == "sendimagetodiscord") {
+        sendimagetodrip(info);
+    } else if (info.menuItemId == "sendimagetodiscord") {
         sendimagetodiscord(info);
     } else if (info.menuItemId == "sendvideotodiscord") {
         sendvideotodiscord(info);
@@ -65,6 +76,9 @@ chrome.contextMenus.onClicked.addListener(function(info, tab) {
     }
 });
 
+function sendimagetodrip(info) {
+    drip.push(info);
+}
 function sendimagetodiscord(info) {
     postToWebhook("**" + username + "**: " + info.srcUrl);
 }
@@ -107,6 +121,10 @@ function postToWebhook(content) {
     xhr.onerror = function(res) {
         console.log('error posting: ', res);
     }
+}
+
+function postDrip(info) {
+    postToWebhook("**" + username + "**: " + info.srcUrl);
 }
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
